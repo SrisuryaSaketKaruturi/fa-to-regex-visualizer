@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FA → RegEx · Arden's Theorem</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,400&family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header>
+  <div class="header-brand">
+    <div class="header-icon">∑</div>
+    <div>
+      <h1>FA <em>→</em> RegEx</h1>
+      <p>Arden's Theorem Solver</p>
+    </div>
+  </div>
+  <div class="header-right">
+    <span class="badge-pill">Theory of Computation</span>
+    <span class="badge-pill accent-badge">R = P*·Q</span>
+  </div>
+</header>
+
+<!-- ── WORKSPACE ── -->
+<div class="workspace">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+    <!-- Presets -->
+    <div class="sidebar-section">
+      <div class="section-title">Presets</div>
+      <button class="preset-btn" onclick="loadPreset('ab')">
+        Strings ending in 'ab'
+        <small>q0,q1,q2 · {a,b}</small>
+      </button>
+      <button class="preset-btn" onclick="loadPreset('astar')">
+        Zero or more a's — a*
+        <small>q0 · {a}</small>
+      </button>
+      <button class="preset-btn" onclick="loadPreset('even')">
+        Even number of a's
+        <small>q0,q1 · {a}</small>
+      </button>
+      <button class="preset-btn" onclick="loadPreset('ab_or_b')">
+        Matches (ab)*b
+        <small>q0,q1,q2 · {a,b}</small>
+      </button>
+    </div>
+
+    <!-- States -->
+    <div class="sidebar-section">
+      <div class="section-title">States</div>
+      <div class="form-row">
+        <div style="display:flex;gap:6px">
+          <input type="text" id="new-state" placeholder="e.g. q0" style="flex:1"
+                 onkeydown="if(event.key==='Enter')addState()"/>
+          <button class="btn btn-ghost btn-sm" onclick="addState()">＋</button>
+        </div>
+      </div>
+      <div class="state-tags" id="state-tags" style="margin-bottom:8px"></div>
+
+      <div class="form-row">
+        <label>Alphabet (comma-separated)</label>
+        <input type="text" id="alphabet" placeholder="a,b" value="a,b"/>
+      </div>
+
+      <div class="form-row">
+        <label>Start state</label>
+        <select id="start-state"></select>
+      </div>
+
+      <div class="form-row">
+        <label>Accept states <span style="color:var(--text3)">(click to toggle)</span></label>
+        <div class="state-tags" id="accept-tags"></div>
+      </div>
+    </div>
+
+    <!-- Transitions -->
+    <div class="sidebar-section">
+      <div class="section-title">Transitions</div>
+      <div class="trans-list" id="trans-list"></div>
+      <button class="btn btn-ghost btn-sm" onclick="addTransition()"
+              style="margin-top:7px;width:100%">
+        + Add row
+      </button>
+    </div>
+
+    <!-- Solve -->
+    <div class="sidebar-section" style="margin-top:auto">
+      <div class="theorem-box">
+        <strong>ARDEN'S LEMMA</strong><br>
+        If R = P·R + Q then R = P*·Q, provided P does not contain ε.
+      </div>
+      <div class="btn-group" style="margin-top:10px">
+        <button class="btn btn-primary" id="btn-solve" onclick="runArdens()">
+          ▶ Solve <span class="arrow">→</span>
+        </button>
+        <button class="btn btn-ghost btn-sm" onclick="resetAll()" title="Reset">↺</button>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- MAIN AREA -->
+  <div class="main-area">
+
+    <!-- GRAPH PANEL -->
+    <div class="graph-panel">
+      <div class="graph-overlay" id="graph-empty">
+        <div class="big-icon">FA</div>
+        <p>Configure your automaton and click Solve</p>
+      </div>
+      <div id="cy" style="display:none"></div>
+      <div class="graph-top-badges" id="graph-badges" style="display:none">
+        <span class="badge-pill">AUTOMATON</span>
+      </div>
+      <div class="graph-legend" id="graph-legend" style="display:none">
+        <div class="legend-item">
+          <div class="legend-dot" style="background:var(--primary)"></div>Start
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:var(--green)"></div>Accept
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:var(--accent)"></div>Normal
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTTOM PANELS -->
+    <div class="bottom-row">
+
+      <!-- Derivation Steps -->
+      <div class="bottom-panel">
+        <div class="panel-header">
+          <span class="ph-icon">📋</span> Derivation Steps
+        </div>
+        <div class="panel-body">
+          <div class="step-content" id="step-content">
+            <span style="color:var(--text3)">Click Solve to begin derivation...</span>
+          </div>
+        </div>
+        <div class="step-nav">
+          <button class="btn btn-ghost btn-sm" id="btn-prev" onclick="prevStep()" disabled>← Prev</button>
+          <div class="step-dots" id="step-dots"></div>
+          <div class="step-counter" id="step-counter">—</div>
+          <button class="btn btn-primary btn-sm" id="btn-next" onclick="nextStep()" disabled>Next →</button>
+        </div>
+      </div>
+
+      <!-- State Equations -->
+      <div class="bottom-panel">
+        <div class="panel-header">
+          <span class="ph-icon">📐</span> State Equations
+        </div>
+        <div class="panel-body">
+          <div class="eq-list" id="eq-list">
+            <div style="color:var(--text3);font-size:12px;font-family:var(--serif);font-style:italic">
+              Equations will appear here after solving.
+            </div>
+          </div>
+          <div id="result-area"></div>
+        </div>
+      </div>
+
+      <!-- Transition Table -->
+      <div class="bottom-panel">
+        <div class="panel-header">
+          <span class="ph-icon">🔀</span> Transition Table
+        </div>
+        <div class="panel-body">
+          <div class="tt-wrap" id="tt-wrap">
+            <div style="color:var(--text3);font-size:12px;font-family:var(--serif);font-style:italic">
+              Transition table will appear here.
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Toast notification -->
+<div class="toast" id="toast"></div>
+
+<script src="js/presets.js"></script>
+<script src="js/state.js"></script>
+<script src="js/transitions.js"></script>
+<script src="js/ardens.js"></script>
+<script src="js/render.js"></script>
+<script src="js/graph.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>
