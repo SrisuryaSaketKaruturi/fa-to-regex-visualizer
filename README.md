@@ -5,9 +5,10 @@ This project is a simple web tool that lets you **build a DFA (Finite Automaton)
 Instead of just showing the final answer, it walks through the **entire process step-by-step**, so it’s easier to understand what’s actually happening.
 
 ---
-
 ## 🌐 Live Demo  
-👉 [Open the Project](https://regex-to-fa-project.vercel.app/)
+[https://regex-to-fa-project.vercel.app/](https://regex-to-fa-project.vercel.app/)
+
+---
 
 ---
 ---
