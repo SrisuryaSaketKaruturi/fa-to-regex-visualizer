@@ -4,7 +4,7 @@ This project is a simple web tool that lets you **build a DFA (Finite Automaton)
 
 Instead of just showing the final answer, it walks through the **entire process step-by-step**, so it’s easier to understand what’s actually happening.
 
-🔗 **Live demo:** https://fa-to-regexpressionardentheoem.vercel.app/
+🔗 **Live demo:**(https://fa-to-regexvisual.vercel.app/)
 
 ---
 
