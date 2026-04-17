@@ -5,25 +5,38 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>FA → RegEx · Arden's Theorem</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,400&family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="css/style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne+Mono&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
 
 <!-- ── HEADER ── -->
 <header>
-  <div class="header-brand">
-    <div class="header-icon">∑</div>
-    <div>
+  <div class="brand">
+    <div class="brand-hex">∑</div>
+    <div class="brand-text">
       <h1>FA <em>→</em> RegEx</h1>
       <p>Arden's Theorem Solver</p>
     </div>
   </div>
-  <div class="header-right">
-    <span class="badge-pill">Theory of Computation</span>
-    <span class="badge-pill accent-badge">R = P*·Q</span>
+  <div class="header-chips">
+    <span class="chip chip-volt">Theory of Computation</span>
+    <span class="chip chip-amber">R = P*·Q</span>
   </div>
 </header>
+
+<!-- ── HERO STRIP ── -->
+<div class="hero-strip">
+  <div>
+    <div class="hero-title">Finite Automaton <span>→ Regular Expression</span></div>
+    <div class="hero-sub">// Configure · Solve · Understand the derivation step-by-step</div>
+  </div>
+  <div class="lemma-card">
+    <strong>Arden's Lemma</strong>
+    If X = P·X + Q, then the unique solution is X = P*·Q,<br>
+    provided ε ∉ L(P).
+  </div>
+</div>
 
 <!-- ── WORKSPACE ── -->
 <div class="workspace">
@@ -32,75 +45,69 @@
   <aside class="sidebar">
 
     <!-- Presets -->
-    <div class="sidebar-section">
-      <div class="section-title">Presets</div>
-      <button class="preset-btn" onclick="loadPreset('ab')">
-        Strings ending in 'ab'
-        <small>q0,q1,q2 · {a,b}</small>
-      </button>
-      <button class="preset-btn" onclick="loadPreset('astar')">
-        Zero or more a's — a*
-        <small>q0 · {a}</small>
-      </button>
-      <button class="preset-btn" onclick="loadPreset('even')">
-        Even number of a's
-        <small>q0,q1 · {a}</small>
-      </button>
-      <button class="preset-btn" onclick="loadPreset('ab_or_b')">
-        Matches (ab)*b
-        <small>q0,q1,q2 · {a,b}</small>
-      </button>
+    <div class="sb-section">
+      <div class="sb-label">Presets <div class="sb-label-line"></div></div>
+      <div class="preset-grid">
+        <button class="preset-btn" onclick="loadPreset('ab')">
+          Ends in 'ab'
+          <small>q0,q1,q2 · {a,b}</small>
+        </button>
+        <button class="preset-btn" onclick="loadPreset('astar')">
+          Zero or more a's
+          <small>q0 · {a}</small>
+        </button>
+        <button class="preset-btn" onclick="loadPreset('even')">
+          Even # of a's
+          <small>q0,q1 · {a}</small>
+        </button>
+        <button class="preset-btn" onclick="loadPreset('ab_or_b')">
+          Matches (ab)*b
+          <small>q0,q1,q2 · {a,b}</small>
+        </button>
+      </div>
     </div>
 
     <!-- States -->
-    <div class="sidebar-section">
-      <div class="section-title">States</div>
+    <div class="sb-section">
+      <div class="sb-label">States <div class="sb-label-line"></div></div>
       <div class="form-row">
-        <div style="display:flex;gap:6px">
-          <input type="text" id="new-state" placeholder="e.g. q0" style="flex:1"
+        <div class="inline-row">
+          <input type="text" id="new-state" placeholder="e.g. q0"
                  onkeydown="if(event.key==='Enter')addState()"/>
           <button class="btn btn-ghost btn-sm" onclick="addState()">＋</button>
         </div>
       </div>
       <div class="state-tags" id="state-tags" style="margin-bottom:8px"></div>
-
       <div class="form-row">
         <label>Alphabet (comma-separated)</label>
         <input type="text" id="alphabet" placeholder="a,b" value="a,b"/>
       </div>
-
       <div class="form-row">
-        <label>Start state</label>
+        <label>Start State</label>
         <select id="start-state"></select>
       </div>
-
       <div class="form-row">
-        <label>Accept states <span style="color:var(--text3)">(click to toggle)</span></label>
+        <label>Accept States <span style="color:var(--text3);font-size:9px">(click to toggle)</span></label>
         <div class="state-tags" id="accept-tags"></div>
       </div>
     </div>
 
     <!-- Transitions -->
-    <div class="sidebar-section">
-      <div class="section-title">Transitions</div>
+    <div class="sb-section">
+      <div class="sb-label">Transitions <div class="sb-label-line"></div></div>
       <div class="trans-list" id="trans-list"></div>
-      <button class="btn btn-ghost btn-sm" onclick="addTransition()"
-              style="margin-top:7px;width:100%">
-        + Add row
+      <button class="btn btn-ghost btn-sm btn-full" onclick="addTransition()" style="margin-top:7px">
+        + Add transition
       </button>
     </div>
 
     <!-- Solve -->
-    <div class="sidebar-section" style="margin-top:auto">
-      <div class="theorem-box">
-        <strong>ARDEN'S LEMMA</strong><br>
-        If R = P·R + Q then R = P*·Q, provided P does not contain ε.
-      </div>
-      <div class="btn-group" style="margin-top:10px">
-        <button class="btn btn-primary" id="btn-solve" onclick="runArdens()">
+    <div class="solve-area">
+      <div class="btn-solve-wrap">
+        <button class="btn btn-volt" id="btn-solve" onclick="runArdens()">
           ▶ Solve <span class="arrow">→</span>
         </button>
-        <button class="btn btn-ghost btn-sm" onclick="resetAll()" title="Reset">↺</button>
+        <button class="btn btn-ghost btn-sm" onclick="resetAll()" title="Reset everything">↺</button>
       </div>
     </div>
 
@@ -112,22 +119,22 @@
     <!-- GRAPH PANEL -->
     <div class="graph-panel">
       <div class="graph-overlay" id="graph-empty">
-        <div class="big-icon">FA</div>
+        <div class="big-fa">FA</div>
         <p>Configure your automaton and click Solve</p>
       </div>
       <div id="cy" style="display:none"></div>
-      <div class="graph-top-badges" id="graph-badges" style="display:none">
-        <span class="badge-pill">AUTOMATON</span>
+      <div class="graph-badge-row" id="graph-badges" style="display:none">
+        <span class="chip chip-volt" style="font-size:9px;padding:3px 9px">AUTOMATON</span>
       </div>
       <div class="graph-legend" id="graph-legend" style="display:none">
-        <div class="legend-item">
-          <div class="legend-dot" style="background:var(--primary)"></div>Start
+        <div class="legend-pill">
+          <div class="legend-dot" style="background:var(--amber)"></div>Start
         </div>
-        <div class="legend-item">
-          <div class="legend-dot" style="background:var(--green)"></div>Accept
+        <div class="legend-pill">
+          <div class="legend-dot" style="background:var(--volt)"></div>Accept
         </div>
-        <div class="legend-item">
-          <div class="legend-dot" style="background:var(--accent)"></div>Normal
+        <div class="legend-pill">
+          <div class="legend-dot" style="background:var(--sky)"></div>Normal
         </div>
       </div>
     </div>
@@ -137,8 +144,8 @@
 
       <!-- Derivation Steps -->
       <div class="bottom-panel">
-        <div class="panel-header">
-          <span class="ph-icon">📋</span> Derivation Steps
+        <div class="panel-head">
+          <div class="ph-dot"></div> Derivation Steps
         </div>
         <div class="panel-body">
           <div class="step-content" id="step-content">
@@ -149,18 +156,18 @@
           <button class="btn btn-ghost btn-sm" id="btn-prev" onclick="prevStep()" disabled>← Prev</button>
           <div class="step-dots" id="step-dots"></div>
           <div class="step-counter" id="step-counter">—</div>
-          <button class="btn btn-primary btn-sm" id="btn-next" onclick="nextStep()" disabled>Next →</button>
+          <button class="btn btn-volt btn-sm" id="btn-next" onclick="nextStep()" disabled>Next →</button>
         </div>
       </div>
 
       <!-- State Equations -->
       <div class="bottom-panel">
-        <div class="panel-header">
-          <span class="ph-icon">📐</span> State Equations
+        <div class="panel-head">
+          <div class="ph-dot" style="background:var(--amber);box-shadow:0 0 6px var(--amber)"></div> State Equations
         </div>
         <div class="panel-body">
           <div class="eq-list" id="eq-list">
-            <div style="color:var(--text3);font-size:12px;font-family:var(--serif);font-style:italic">
+            <div style="color:var(--text3);font-size:11px;font-family:var(--serif);font-style:italic">
               Equations will appear here after solving.
             </div>
           </div>
@@ -170,12 +177,12 @@
 
       <!-- Transition Table -->
       <div class="bottom-panel">
-        <div class="panel-header">
-          <span class="ph-icon">🔀</span> Transition Table
+        <div class="panel-head">
+          <div class="ph-dot" style="background:var(--sky);box-shadow:0 0 6px var(--sky)"></div> Transition Table δ
         </div>
         <div class="panel-body">
           <div class="tt-wrap" id="tt-wrap">
-            <div style="color:var(--text3);font-size:12px;font-family:var(--serif);font-style:italic">
+            <div style="color:var(--text3);font-size:11px;font-family:var(--serif);font-style:italic">
               Transition table will appear here.
             </div>
           </div>
@@ -186,16 +193,9 @@
   </div>
 </div>
 
-<!-- Toast notification -->
+<!-- Toast -->
 <div class="toast" id="toast"></div>
 
-<script src="js/presets.js"></script>
-<script src="js/state.js"></script>
-<script src="js/transitions.js"></script>
-<script src="js/ardens.js"></script>
-<script src="js/render.js"></script>
-<script src="js/graph.js"></script>
-<script src="js/app.js"></script>
-
+<script src="app.js"></script>
 </body>
 </html>
